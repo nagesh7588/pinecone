@@ -1,9 +1,7 @@
-name: Deploy to GitHub Pages
+name: Deploy Flask App
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
     branches: [ main ]
 
 jobs:
@@ -11,7 +9,8 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -23,20 +22,12 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     
-    - name: Run tests
+    - name: Test Flask app
       run: |
-        python -m pytest --version || echo "No tests found"
+        python -c "import web_app; print('✅ Flask app imports successfully')"
     
-    - name: Generate static documentation
+    - name: Deploy to Render
       run: |
-        echo "Generating documentation..."
-        mkdir -p docs
-        cp README.md docs/
-        echo "Documentation generated!"
-    
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
-      uses: peaceiris/actions-gh-pages@v3
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs
+        echo "🚀 Flask app ready for deployment!"
+        echo "📝 Connect your GitHub repo to Render.com for automatic deployment"
+        echo "🌐 Your app will be live at: https://your-app-name.onrender.com"
