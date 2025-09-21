@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📸 Image Vector Database - Search Images by Description</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .upload-section {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .upload-form {
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 40px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .upload-area:hover {
+            background: #f0f8ff;
+            border-color: #2980b9;
+        }
+        
+        .upload-area.dragover {
+            background: #e3f2fd;
+            border-color: #1976d2;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        
+        .description-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        
+        .upload-btn {
+            background: #3498db;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .upload-btn:hover {
+            background: #2980b9;
+        }
+        
+        .upload-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .search-section {
+            padding: 30px;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        .search-btn {
+            padding: 15px 30px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .filter-section {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid #e74c3c;
+            background: white;
+            color: #e74c3c;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .filter-btn.active {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .results-section {
+            padding: 0 30px 30px;
+        }
+        
+        .result-item {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        
+        .result-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 2px solid #ddd;
+        }
+        
+        .result-content {
+            flex: 1;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .result-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .type-image {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .type-text {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .similarity-score {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 18px;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .result-details {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .sample-queries {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .sample-query {
+            display: inline-block;
+            background: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .sample-query:hover {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .message {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📸 Image Vector Database</h1>
+            <p>Upload images and search them by description - Powered by local AI embeddings!</p>
+        </div>
+        
+        <div class="upload-section">
+            <div class="upload-form">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📸</div>
+                    <h3>Drop image here or click to upload</h3>
+                    <p>🤖 <strong>Auto Analysis:</strong> AI will analyze your image content!</p>
+                    <p>Supports: JPG, PNG, GIF, BMP (Max 16MB)</p>
+                    <input type="file" id="file-input" accept="image/*" style="display: none;">
+                </div>
+                
+                <input type="text" id="description-input" class="description-input" 
+                       placeholder="Optional: Add keywords or let AI analyze your image automatically..."
+                       >
+                
+                <p style="color: #3498db; font-weight: bold; margin-bottom: 15px;">
+                    🤖 AI will automatically analyze your image content for search!
+                </p>
+                
+                <button id="upload-btn" class="upload-btn" disabled>
+                    🤖 Upload & Auto-Analyze Image
+                </button>
+                
+                <div id="upload-message"></div>
+            </div>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="total-count">--</div>
+                <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="image-count">--</div>
+                <div class="stat-label">Images</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="text-count">--</div>
+                <div class="stat-label">Text Items</div>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <div class="search-form">
+                    <input type="text" id="search-input" class="search-input" 
+                           placeholder="Search for 'cat', 'mountain', 'city lights', 'flowers'..." />
+                    <button onclick="performSearch()" class="search-btn">🔍 Search</button>
+                </div>
+                
+                <div class="filter-section">
+                    <button class="filter-btn active" onclick="setFilter('all')">All Results</button>
+                    <button class="filter-btn" onclick="setFilter('image')">📸 Images</button>
+                    <button class="filter-btn" onclick="setFilter('text')">📄 Text</button>
+                </div>
+                
+                <div class="sample-queries">
+                    <h3>💡 Try these sample searches:</h3>
+                    <span class="sample-query" onclick="searchQuery('cat')">cat</span>
+                    <span class="sample-query" onclick="searchQuery('mountain')">mountain</span>
+                    <span class="sample-query" onclick="searchQuery('city')">city</span>
+                    <span class="sample-query" onclick="searchQuery('flower')">flower</span>
+                    <span class="sample-query" onclick="searchQuery('ocean')">ocean</span>
+                    <span class="sample-query" onclick="searchQuery('nature')">nature</span>
+                    <span class="sample-query" onclick="searchQuery('landscape')">landscape</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilter = 'all';
+        let selectedFile = null;
+        
+        // Load stats on page load
+        window.addEventListener('load', function() {
+            loadStats();
+        });
+        
+        // File upload handling
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const uploadBtn = document.getElementById('upload-btn');
+        const descriptionInput = document.getElementById('description-input');
+        
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', handleDragOver);
+        uploadArea.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+        
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+        
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                selectedFile = files[0];
+                updateUploadUI();
+            }
+        }
+        
+        function handleFileSelect(e) {
+            selectedFile = e.target.files[0];
+            updateUploadUI();
+        }
+        
+        function updateUploadUI() {
+            if (selectedFile) {
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">✅</div>
+                    <h3>${selectedFile.name}</h3>
+                    <p>Ready for AI analysis - Click upload!</p>
+                `;
+                uploadBtn.disabled = false;
+            }
+        }
+        
+        // Upload image
+        uploadBtn.addEventListener('click', function() {
+            if (!selectedFile) {
+                alert('Please select an image first!');
+                return;
+            }
+            
+            const description = descriptionInput.value.trim();
+            // Description is now optional - use empty string if not provided
+            
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            formData.append('description', description || '');
+            
+            uploadBtn.disabled = true;
+            uploadBtn.textContent = '⏳ Analyzing & Indexing...';
+            
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const messageDiv = document.getElementById('upload-message');
+                if (data.success) {
+                    messageDiv.innerHTML = `<div class="message success">
+                        ✅ ${data.message}<br>
+                        🤖 Image analyzed and indexed! Try searching for related keywords.
+                    </div>`;
+                    resetUploadForm();
+                    loadStats();
+                } else {
+                    messageDiv.innerHTML = `<div class="message error">❌ Error: ${data.error}</div>`;
+                }
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '🤖 Upload & Auto-Analyze Image';
+            })
+            .catch(error => {
+                document.getElementById('upload-message').innerHTML = 
+                    `<div class="message error">❌ Upload failed: ${error}</div>`;
+                uploadBtn.disabled = false;
+                uploadBtn.textContent = '🤖 Upload & Auto-Analyze Image';
+            });
+        });
+        
+        function resetUploadForm() {
+            selectedFile = null;
+            fileInput.value = '';
+            descriptionInput.value = '';
+            uploadArea.innerHTML = `
+                <div class="upload-icon">📸</div>
+                <h3>Drop image here or click to upload</h3>
+                <p>🤖 <strong>Auto Analysis:</strong> AI will analyze your image content!</p>
+                <p>Supports: JPG, PNG, GIF, BMP (Max 16MB)</p>
+            `;
+            uploadBtn.disabled = true;
+        }
+        
+        // Load statistics
+        function loadStats() {
+            fetch('/stats')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-count').textContent = data.total;
+                    document.getElementById('image-count').textContent = data.images;
+                    document.getElementById('text-count').textContent = data.texts;
+                });
+        }
+        
+        // Search functionality
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        function searchQuery(query) {
+            document.getElementById('search-input').value = query;
+            performSearch();
+        }
+        
+        function performSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+            
+            const results = document.getElementById('results');
+            results.innerHTML = '<div style="text-align: center; padding: 20px;">🔄 Searching...</div>';
+            
+            fetch('/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: query,
+                    filter: currentFilter,
+                    top_k: 5
+                })
+            })
+            .then(response => response.json())
+            .then(data => displayResults(data, query))
+            .catch(error => {
+                results.innerHTML = `<div style="text-align: center; padding: 20px; color: red;">Error: ${error}</div>`;
+            });
+        }
+        
+        function displayResults(results, query) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        No results found for "${query}"<br>
+                        Try uploading some images or using different keywords.
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsDiv.innerHTML = results.map((result, index) => {
+                const metadata = result.metadata;
+                const isImage = metadata.type === 'image';
+                
+                return `
+                    <div class="result-item">
+                        ${isImage && metadata.image_data ? `
+                            <img src="data:image/jpeg;base64,${metadata.image_data}" 
+                                 class="result-image" alt="${metadata.title}">
+                        ` : `
+                            <div class="result-image" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 3em;">
+                                ${isImage ? '📸' : '📄'}
+                            </div>
+                        `}
+                        
+                        <div class="result-content">
+                            <div class="result-header">
+                                <span class="result-type ${isImage ? 'type-image' : 'type-text'}">
+                                    ${isImage ? '📸 Image' : '📄 Text'}
+                                </span>
+                                <span class="similarity-score">${(result.score * 100).toFixed(1)}% match</span>
+                            </div>
+                            
+                            <div class="result-title">${metadata.title}</div>
+                            <div class="result-details">
+                                <strong>Description:</strong> ${metadata.content}<br>
+                                ${isImage ? `<strong>Type:</strong> Uploaded Image` : `<strong>Type:</strong> Sample Text`}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

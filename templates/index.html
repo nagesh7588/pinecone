@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌲 Vector Database Demo - Local Host</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .search-section {
+            padding: 30px;
+        }
+        
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .search-btn {
+            padding: 15px 30px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .search-btn:hover {
+            background: #2980b9;
+        }
+        
+        .results-section {
+            padding: 0 30px 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            display: none;
+        }
+        
+        .result-item {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .result-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .result-type {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .type-structured {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+        
+        .type-unstructured {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        
+        .similarity-score {
+            font-weight: bold;
+            color: #3498db;
+            font-size: 18px;
+        }
+        
+        .result-content {
+            margin-top: 15px;
+        }
+        
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        
+        .result-details {
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+        
+        .sample-queries {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .sample-queries h3 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .sample-query {
+            display: inline-block;
+            background: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: all 0.3s;
+        }
+        
+        .sample-query:hover {
+            background: #3498db;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌲 Vector Database Demo</h1>
+            <p>Semantic search with local embeddings - No external APIs!</p>
+        </div>
+        
+        <div class="stats" id="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="total-vectors">--</div>
+                <div class="stat-label">Total Vectors</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="unstructured-count">--</div>
+                <div class="stat-label">Documents</div>
+            </div>
+        </div>
+        
+        <div class="search-section">
+            <div class="search-container">
+                <div class="search-form">
+                    <input type="text" id="search-input" class="search-input" placeholder="Search for programming, data science, web development..." />
+                    <button onclick="performSearch()" class="search-btn">🔍 Search Documents</button>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px; color: #666;">
+                    🔍 Searches through all documents and articles
+                </div>
+                
+                <div class="sample-queries">
+                    <h3>💡 Try these sample searches:</h3>
+                    <span class="sample-query" onclick="searchQuery('programming')">programming</span>
+                    <span class="sample-query" onclick="searchQuery('data science')">data science</span>
+                    <span class="sample-query" onclick="searchQuery('python')">python</span>
+                    <span class="sample-query" onclick="searchQuery('web development')">web development</span>
+                    <span class="sample-query" onclick="searchQuery('machine learning')">machine learning</span>
+                    <span class="sample-query" onclick="searchQuery('design')">design</span>
+                    <span class="sample-query" onclick="searchQuery('javascript')">javascript</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results-section">
+            <div class="loading" id="loading">
+                🔄 Searching vectors...
+            </div>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load stats on page load
+        window.addEventListener('load', function() {
+            loadStats();
+        });
+        
+        // Load statistics
+        function loadStats() {
+            fetch('/data')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('total-vectors').textContent = data.vectors;
+                    document.getElementById('unstructured-count').textContent = data.unstructured;
+                });
+        }
+        
+        // Search with sample query
+        function searchQuery(query) {
+            document.getElementById('search-input').value = query;
+            performSearch();
+        }
+        
+        // Perform search - always searches everything
+        function performSearch() {
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+            
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            loading.style.display = 'block';
+            results.innerHTML = '';
+            
+            fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: query,
+                    filter: 'all',  // Always search everything
+                    top_k: 8  // Show more results since we're searching everything
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                displayResults(data, query);
+            })
+            .catch(error => {
+                loading.style.display = 'none';
+                console.error('Error:', error);
+            });
+        }
+        
+        // Display search results
+        function displayResults(results, query) {
+            const resultsDiv = document.getElementById('results');
+            
+            if (results.length === 0) {
+                resultsDiv.innerHTML = `
+                    <div class="no-results">
+                        No documents found for "${query}"<br>
+                        Try different keywords or check the sample queries above.
+                    </div>
+                `;
+                return;
+            }
+            
+            resultsDiv.innerHTML = results.map((result, index) => {
+                const metadata = result.metadata;
+                // Only showing documents now (no person results)
+                
+                return `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <span class="result-type type-unstructured">
+                                📄 Document
+                            </span>
+                            <span class="similarity-score">${(result.score * 100).toFixed(1)}% match</span>
+                        </div>
+                        
+                        <div class="result-content">
+                            <div class="result-title">${metadata.title}</div>
+                            <div class="result-details">
+                                <strong>Content:</strong> ${metadata.content_preview}...<br>
+                                <strong>Length:</strong> ${metadata.content_length} characters<br>
+                                <strong>Document ID:</strong> ${metadata.doc_id}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Allow Enter key to search
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+{
+  "name": "pinecone-vector-database",
+  "version": "1.0.0",
+  "description": "Vector database demo with Pinecone, Flask, and image search",
+  "main": "web_app.py",
+  "scripts": {
+    "start": "python web_app.py",
+    "dev": "python web_app.py",
+    "build": "echo 'No build step required'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nagesh7588/pinecone.git"
+  },
+  "keywords": [
+    "pinecone",
+    "vector-database",
+    "machine-learning",
+    "flask",
+    "python",
+    "semantic-search"
+  ],
+  "author": "nagesh7588",
+  "license": "MIT",
+  "engines": {
+    "python": "3.8+"
+  }
+}
