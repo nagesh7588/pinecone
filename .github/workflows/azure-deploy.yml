@@ -25,7 +25,7 @@ jobs:
 
     - name: Test application
       run: |
-        python -c "import web_app; print('✅ Flask app imports successfully')"
+        python -c "import app; print('✅ Flask app imports successfully')"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2

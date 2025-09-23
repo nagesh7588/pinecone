@@ -14,7 +14,7 @@ A simple Python Flask application demonstrating vector database capabilities for
 ```
 pinecone/
 ├── main.py              # CLI demo with Pinecone cloud
-├── web_app.py          # Main Flask web application
+├── app.py              # Main Flask web application
 ├── application.py      # Azure App Service entry point
 ├── requirements.txt    # Python dependencies
 ├── web.config         # Azure configuration
@@ -44,7 +44,7 @@ pinecone/
 
 4. **Run locally**:
    ```bash
-   python web_app.py
+   python app.py
    ```
    Open browser to `http://localhost:5000`
 
