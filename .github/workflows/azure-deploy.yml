@@ -30,11 +30,11 @@ jobs:
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'pinecone-vector-demo'  # Change this to your Azure app name
+        app-name: 'pincon'  # Your Azure app name
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
         package: .
 
     - name: Post-deployment notification
       run: |
         echo "🎉 Deployment completed successfully!"
-        echo "🌐 Your app should be live at: https://pinecone-vector-demo.azurewebsites.net"
+        echo "🌐 Your app should be live at: https://pincon.azurewebsites.net"
